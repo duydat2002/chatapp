@@ -89,12 +89,10 @@ public class ProfileActivity extends AppCompatActivity {
             // Đã là bạn bè
             binding.buttonMain.setImageResource(R.drawable.ic_unfriend);
             binding.buttonMain.setOnClickListener(v -> unFriend(otherUser));
-            Log.d("Profile - type", "Unfriend");
         } else {
             // Chưa phải bạn
             binding.buttonMain.setImageResource(R.drawable.ic_add_friend);
             binding.buttonMain.setOnClickListener(v -> addFriend(otherUser));
-            Log.d("Profile - type", "Addfriend");
         }
     }
 
@@ -126,6 +124,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void signOut() {
         showToast("Signing out...");
+
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection(Constants.KEY_COLLECTION_USERS)
                 .document(currentUserId)
@@ -168,7 +167,6 @@ public class ProfileActivity extends AppCompatActivity {
                 .update(Constants.KEY_FRIEND_IDS, friendIds);
         otherUser.setFriendIds(friendIds);
 
-        Log.d("UN", otherUser.getFriendIds());
         typeAction = "Addfriend";
         setTypeAction(typeAction);
 
@@ -206,7 +204,6 @@ public class ProfileActivity extends AppCompatActivity {
                 .update(Constants.KEY_FRIEND_IDS, friendIds);
         otherUser.setFriendIds(friendIds);
 
-        Log.d("ADD", otherUser.getFriendIds());
         typeAction = "Unfriend";
         setTypeAction(typeAction);
 

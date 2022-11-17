@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.chatbtl.R;
 import com.example.chatbtl.adapters.ChatAdapter;
@@ -56,13 +57,13 @@ public class ChatActivity extends AppCompatActivity {
     private void loadReceiverDatas() {
         receiverUser = (User) getIntent().getSerializableExtra(Constants.KEY_USER);
         binding.textName.setText(receiverUser.getName());
-        if (receiverUser.getOnline()) {
-            binding.textActive.setText("Online");
-            binding.textActive.setTextColor(getResources().getColor(R.color.online));
-        } else {
-            binding.textActive.setText("Offline");
-            binding.textActive.setTextColor(getResources().getColor(R.color.offline));
-        }
+//        if (receiverUser.getOnline()) {
+//            binding.textActive.setText("Online");
+//            binding.textActive.setTextColor(getResources().getColor(R.color.online));
+//        } else {
+//            binding.textActive.setText("Offline");
+//            binding.textActive.setTextColor(getResources().getColor(R.color.offline));
+//        }
 
         byte[] bytes = Base64.decode(receiverUser.getImage(), Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
@@ -76,6 +77,7 @@ public class ChatActivity extends AppCompatActivity {
         chatAdapter = new ChatAdapter(chatMessages, senderId, receiverUser);
         binding.recyclerMessage.setAdapter(chatAdapter);
         database = FirebaseFirestore.getInstance();
+        getConversionId();
     }
 
     private void setListeners() {
@@ -96,12 +98,13 @@ public class ChatActivity extends AppCompatActivity {
         HashMap<String, Object> message = new HashMap<>();
         message.put(Constants.KEY_SENDER_ID, senderId);
         message.put(Constants.KEY_RECEIVER_ID, receiverUser.getId());
-        message.put(Constants.KEY_MESSAGE, binding.inputMessage.getText().toString());
+        message.put(Constants.KEY_MESSAGE, binding.inputMessage.getText().toString().trim());
         message.put(Constants.KEY_TIMESTAMP, new Date());
         database.collection(Constants.KEY_COLLECTION_CHAT)
                 .add(message);
 
         getConversionId();
+        Toast.makeText(getApplicationContext(), conversionId, Toast.LENGTH_LONG).show();
 
         if (conversionId != null) {
             updateConversion(binding.inputMessage.getText().toString());
@@ -113,7 +116,7 @@ public class ChatActivity extends AppCompatActivity {
             conversion.put(Constants.KEY_RECEIVER_ID, receiverUser.getId());
             conversion.put(Constants.KEY_RECEIVER_NAME, receiverUser.getName());
             conversion.put(Constants.KEY_RECEIVER_IMAGE, receiverUser.getImage());
-            conversion.put(Constants.KEY_LAST_MESSAGE, binding.inputMessage.getText().toString());
+            conversion.put(Constants.KEY_LAST_MESSAGE, binding.inputMessage.getText().toString().trim());
             conversion.put(Constants.KEY_TIMESTAMP, new Date());
             addConversion(conversion);
         }
@@ -130,7 +133,6 @@ public class ChatActivity extends AppCompatActivity {
                     if (task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0) {
                         DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
                         conversionId = documentSnapshot.getId();
-                        Log.d("ConversionId - 1", conversionId);
                     }
                 });
 
@@ -142,7 +144,6 @@ public class ChatActivity extends AppCompatActivity {
                     if (task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0) {
                         DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
                         conversionId = documentSnapshot.getId();
-                        Log.d("ConversionId - 2", conversionId);
                     }
                 });
     }

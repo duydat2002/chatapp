@@ -132,10 +132,10 @@ public class FriendsActivity extends AppCompatActivity implements UserInterface 
         });
     }
 
-    private void searchFriends(List<User> friends, String phone) {
+    private void searchFriends(List<User> friends, String name) {
         List<User> friendSearches = new ArrayList<>();
         for (User friend : friends) {
-            if (friend.getPhone().contains(phone)) {
+            if (friend.getName().contains(name)) {
                 friendSearches.add(friend);
             }
         }

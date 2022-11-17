@@ -14,7 +14,10 @@ import com.example.chatbtl.interfaces.ConversionInterface;
 import com.example.chatbtl.models.ChatMessage;
 import com.example.chatbtl.models.User;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ConversionAdapter extends RecyclerView.Adapter<ConversionAdapter.ConversionViewHolder> {
 
@@ -69,9 +72,13 @@ public class ConversionAdapter extends RecyclerView.Adapter<ConversionAdapter.Co
                 user.setId(chatMessages.getConversionId());
                 user.setName(chatMessages.getConversionName());
                 user.setImage(chatMessages.getConversionImage());
+
                 conversionInterface.onConversionClicked(user);
             });
         }
+    }
 
+    private String convertDate(Date date) {
+        return new SimpleDateFormat("HH:mm, dd/MM/yyyy", Locale.getDefault()).format(date);
     }
 }
