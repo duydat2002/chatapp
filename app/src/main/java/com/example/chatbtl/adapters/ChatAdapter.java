@@ -14,6 +14,8 @@ import com.example.chatbtl.databinding.ItemSentMessageBinding;
 import com.example.chatbtl.models.ChatMessage;
 import com.example.chatbtl.models.User;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
@@ -81,7 +83,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         void setData(ChatMessage chatMessage) {
             binding.textMessage.setText(chatMessage.getMessage());
-            binding.textDate.setText(chatMessage.getTimeStamp());
+            binding.textDate.setText(convertDate(chatMessage.getDateObj()));
         }
 
     }
@@ -97,11 +99,25 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         void setData(ChatMessage chatMessage, User receiverUser) {
             binding.textMessage.setText(chatMessage.getMessage());
-            binding.textDate.setText(chatMessage.getTimeStamp());
+            binding.textDate.setText(convertDate(chatMessage.getDateObj()));
             byte[] bytes = Base64.decode(receiverUser.getImage(), Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             binding.imageProfile.setImageBitmap(bitmap);
         }
 
+    }
+
+    private String convertDate(Date date) {
+        String pattern = "HH:mm, dd/MM/yyyy";
+        int day = date.getDay(),
+                month = date.getMonth(),
+                year = date.getYear();
+        Date curDate = new Date();
+        if (day == curDate.getDay() && month == curDate.getMonth() && year == curDate.getYear()) {
+            pattern = "HH:mm";
+        } else if (date.getYear() == new Date().getYear()) {
+            pattern = "HH:mm, dd/MM";
+        }
+        return new SimpleDateFormat(pattern).format(date);
     }
 }

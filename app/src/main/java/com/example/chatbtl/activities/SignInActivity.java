@@ -17,6 +17,7 @@ import com.example.chatbtl.utilities.PreferenceManager;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class SignInActivity extends AppCompatActivity {
@@ -72,9 +73,11 @@ public class SignInActivity extends AppCompatActivity {
                         preferenceManager.putString(Constants.KEY_NAME, documentSnapshot.getString(Constants.KEY_NAME));
                         preferenceManager.putString(Constants.KEY_PHONE, documentSnapshot.getString(Constants.KEY_PHONE));
                         preferenceManager.putString(Constants.KEY_IMAGE, documentSnapshot.getString(Constants.KEY_IMAGE));
-                        preferenceManager.putString(Constants.KEY_FRIEND_IDS, documentSnapshot.getString(Constants.KEY_FRIEND_IDS));
+                        List<String> friendIds = (List<String>) documentSnapshot.get(Constants.KEY_FRIEND_IDS);
+                        preferenceManager.putString(Constants.KEY_FRIEND_IDS, String.join("-", friendIds));
 
                         startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        finish();
                     } else {
                         loading(false);
                         showToast("Incorrect phone number or password");

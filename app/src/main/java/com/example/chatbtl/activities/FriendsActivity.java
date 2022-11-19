@@ -4,27 +4,32 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.chatbtl.R;
 import com.example.chatbtl.adapters.UserAdapter;
 import com.example.chatbtl.databinding.ActivityFriendsBinding;
 import com.example.chatbtl.interfaces.UserInterface;
 import com.example.chatbtl.models.User;
 import com.example.chatbtl.utilities.Constants;
 import com.example.chatbtl.utilities.PreferenceManager;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-public class FriendsActivity extends AppCompatActivity implements UserInterface {
+public class FriendsActivity extends BaseActivity implements UserInterface {
 
     private ActivityFriendsBinding binding;
     private PreferenceManager preferenceManager;
+    private UserAdapter userAdapter;
     private List<User> friends;
     private String currentUserId;
 
@@ -35,45 +40,44 @@ public class FriendsActivity extends AppCompatActivity implements UserInterface 
         preferenceManager = new PreferenceManager(getApplicationContext());
         currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
         friends = new ArrayList<>();
+        userAdapter = new UserAdapter(friends, this);
+        binding.recyclerPeople.setAdapter(userAdapter);
         setContentView(binding.getRoot());
         loadFriends();
         setListeners();
+        listenStatus();
     }
 
     private void loadFriends() {
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection(Constants.KEY_COLLECTION_USERS)
+                .whereArrayContains(Constants.KEY_FRIEND_IDS, currentUserId)
                 .get()
                 .addOnCompleteListener(task -> {
                     loading(false);
 
                     if (task.isSuccessful() && task.getResult() != null) {
-                        friends = new ArrayList<>();
 
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            if (queryDocumentSnapshot.getString(Constants.KEY_FRIEND_IDS)
-                                    .contains(currentUserId)) {
                                 User user = new User();
                                 user.setId(queryDocumentSnapshot.getId());
                                 user.setName(queryDocumentSnapshot.getString(Constants.KEY_NAME));
                                 user.setPhone(queryDocumentSnapshot.getString(Constants.KEY_PHONE));
                                 user.setImage(queryDocumentSnapshot.getString(Constants.KEY_IMAGE));
-                                user.setFriendIds(queryDocumentSnapshot.getString(Constants.KEY_FRIEND_IDS));
+                                user.setFriendIds((List<String>) queryDocumentSnapshot.get(Constants.KEY_FRIEND_IDS));
                                 user.setOnline(queryDocumentSnapshot.getBoolean(Constants.KEY_ONLINE));
                                 friends.add(user);
-                            }
                         }
 
                         if (friends.size() > 0) {
-                            UserAdapter userAdapter = new UserAdapter(friends, this);
-                            binding.recyclerPeople.setAdapter(userAdapter);
+                            userAdapter.notifyDataSetChanged();
                             binding.recyclerPeople.setVisibility(View.VISIBLE);
                         } else {
-                            showToast("Cac 0 tim thay");
+                            showToast("0 tim thay");
                         }
                     } else {
-                        showToast("Lỗi r dm");
+                        showToast("Lỗi r");
                     }
                 });
     }
@@ -122,7 +126,7 @@ public class FriendsActivity extends AppCompatActivity implements UserInterface 
                 binding.recyclerPeople.setAdapter(userAdapter);
                 binding.recyclerPeople.setVisibility(View.VISIBLE);
             } else {
-                showToast("Cac 0 tim thay");
+                showToast("0 tim thay");
             }
 
             if (binding.inputAddFriend.getVisibility() == View.VISIBLE) {
@@ -135,7 +139,7 @@ public class FriendsActivity extends AppCompatActivity implements UserInterface 
     private void searchFriends(List<User> friends, String name) {
         List<User> friendSearches = new ArrayList<>();
         for (User friend : friends) {
-            if (friend.getName().contains(name)) {
+            if (friend.getName().toLowerCase().contains(name.toLowerCase())) {
                 friendSearches.add(friend);
             }
         }
@@ -161,7 +165,7 @@ public class FriendsActivity extends AppCompatActivity implements UserInterface 
                         user.setName(documentSnapshot.getString(Constants.KEY_NAME));
                         user.setPhone(documentSnapshot.getString(Constants.KEY_PHONE));
                         user.setImage(documentSnapshot.getString(Constants.KEY_IMAGE));
-                        user.setFriendIds(documentSnapshot.getString(Constants.KEY_FRIEND_IDS));
+                        user.setFriendIds((List<String>) documentSnapshot.get(Constants.KEY_FRIEND_IDS));
                         user.setOnline(documentSnapshot.getBoolean(Constants.KEY_ONLINE));
                         peopleSearches.add(user);
                     } else {
@@ -185,22 +189,33 @@ public class FriendsActivity extends AppCompatActivity implements UserInterface 
         }
     }
 
+    private void listenStatus() {
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        database.collection(Constants.KEY_COLLECTION_USERS)
+                .whereArrayContains(Constants.KEY_FRIEND_IDS, currentUserId)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null)
+                        return;
+
+                    if (value != null) {
+                        for (DocumentChange documentChange : value.getDocumentChanges()) {
+                            QueryDocumentSnapshot queryDocumentSnapshot = documentChange.getDocument();
+                            for (int i=0; i<friends.size(); i++) {
+                                if (friends.get(i).getId().equals(queryDocumentSnapshot.getId())) {
+                                    friends.get(i).setOnline((Boolean) queryDocumentSnapshot.get(Constants.KEY_ONLINE));
+                                    userAdapter.notifyItemChanged(i);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+
     @Override
     public void onUserClicked(User user) {
         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
         intent.putExtra(Constants.KEY_USER, user);
         startActivity(intent);
-        finish();
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadFriends();
-    }
-
-    //    private void showErrorMessage() {
-//        binding.textErrorMessage.setText(String.format("%s", "No user available"));
-//        binding.textErrorMessage.setVisibility(View.VISIBLE);
-//    }
 }

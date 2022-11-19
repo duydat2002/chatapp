@@ -24,6 +24,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.checkerframework.checker.units.qual.C;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -32,7 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
 
     private ActivityProfileBinding binding;
     private PreferenceManager preferenceManager;
@@ -50,7 +52,6 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         loadUserDatas();
         setListeners();
-        showToast("Create");
     }
 
     private void setListeners() {
@@ -66,12 +67,14 @@ public class ProfileActivity extends AppCompatActivity {
             binding.buttonChangeImage.setVisibility(View.VISIBLE);
         } else {
             // Khởi tạo nút lần đầu
-            typeAction = otherUser.getFriendIds().contains(currentUserId) ? "Unfriend" : "Addfriend";
+            typeAction = preferenceManager.getString(Constants.KEY_FRIEND_IDS).contains(otherUser.getId()) ? "Unfriend" : "Addfriend";
             setTypeAction(typeAction);
 
+            binding.buttonBack.setOnClickListener(v -> {
+                startActivity(new Intent(ProfileActivity.this, FriendsActivity.class));
+                finish();
+            });
             //Người khác vào trang
-            binding.buttonBack.setOnClickListener(v ->
-                    startActivity(new Intent(getApplicationContext(), FriendsActivity.class)));
 
             binding.buttonChangeInfo.setVisibility(View.INVISIBLE);
             binding.buttonChangePassword.setVisibility(View.INVISIBLE);
@@ -129,43 +132,36 @@ public class ProfileActivity extends AppCompatActivity {
         database.collection(Constants.KEY_COLLECTION_USERS)
                 .document(currentUserId)
                 .update(Constants.KEY_ONLINE, false)
-                .addOnSuccessListener(unused -> {
+                .addOnCompleteListener(task -> {
                     preferenceManager.clear();
                     startActivity(new Intent(getApplicationContext(), SignInActivity.class));
                     finish();
-                })
-                .addOnFailureListener(e -> showToast("Unable to sign out"));
+                });
     }
 
     private void unFriend(User otherUser) {
-        List<String> friendIdList;
-        String friendIds;
         FirebaseFirestore database = FirebaseFirestore.getInstance();
 
         // === Xóa bạn bên chủ ===
-        friendIdList = new ArrayList<>(Arrays.asList(
-                preferenceManager.getString(Constants.KEY_FRIEND_IDS).split("-")));
-        friendIdList.remove(otherUser.getId());
-        friendIds = friendIdList.toString();
-        friendIds = friendIds.substring(1, friendIds.length() - 1).replaceAll(", ", "-");
-
-        database.collection(Constants.KEY_COLLECTION_USERS)
-                .document(currentUserId)
-                .update(Constants.KEY_FRIEND_IDS, friendIds);
-        preferenceManager.putString(Constants.KEY_FRIEND_IDS, friendIds);
-
+        DocumentReference curUserDoc = database.collection(Constants.KEY_COLLECTION_USERS)
+                .document(currentUserId);
+        curUserDoc.update(Constants.KEY_FRIEND_IDS, FieldValue.arrayRemove(otherUser.getId()));
+        curUserDoc.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                List<String> friendIds = (List<String>) task.getResult().get(Constants.KEY_FRIEND_IDS);
+                preferenceManager.putString(Constants.KEY_FRIEND_IDS, String.join("-", friendIds));
+            }
+        });
 
         // === Xóa bạn bên khách ===
-        friendIdList = new ArrayList<>(Arrays.asList(
-                otherUser.getFriendIds().split("-")));
-        friendIdList.remove(currentUserId);
-        friendIds = friendIdList.toString();
-        friendIds = friendIds.substring(1, friendIds.length() - 1).replaceAll(", ", "-");
-
-        database.collection(Constants.KEY_COLLECTION_USERS)
-                .document(otherUser.getId())
-                .update(Constants.KEY_FRIEND_IDS, friendIds);
-        otherUser.setFriendIds(friendIds);
+        DocumentReference othUserDoc = database.collection(Constants.KEY_COLLECTION_USERS)
+                .document(otherUser.getId());
+        othUserDoc.update(Constants.KEY_FRIEND_IDS, FieldValue.arrayRemove(currentUserId));
+        othUserDoc.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                otherUser.setFriendIds((List<String>) task.getResult().get(Constants.KEY_FRIEND_IDS));
+            }
+        });
 
         typeAction = "Addfriend";
         setTypeAction(typeAction);
@@ -175,34 +171,28 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void addFriend(User otherUser) {
-        List<String> friendIdList;
-        String friendIds;
         FirebaseFirestore database = FirebaseFirestore.getInstance();
 
         // === Kết bạn bên chủ ===
-        friendIdList = new ArrayList<>(Arrays.asList(
-                preferenceManager.getString(Constants.KEY_FRIEND_IDS).split("-")));
-        if (!friendIdList.contains(otherUser.getId()))
-            friendIdList.add(otherUser.getId());
-        friendIds = friendIdList.toString();
-        friendIds = friendIds.substring(1, friendIds.length() - 1).replaceAll(", ", "-");
-
-        database.collection(Constants.KEY_COLLECTION_USERS)
-                .document(currentUserId)
-                .update(Constants.KEY_FRIEND_IDS, friendIds);
+        DocumentReference curUserDoc = database.collection(Constants.KEY_COLLECTION_USERS)
+                .document(currentUserId);
+        curUserDoc.update(Constants.KEY_FRIEND_IDS, FieldValue.arrayUnion(otherUser.getId()));
+        curUserDoc.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                List<String> friendIds = (List<String>) task.getResult().get(Constants.KEY_FRIEND_IDS);
+                preferenceManager.putString(Constants.KEY_FRIEND_IDS, String.join("-", friendIds));
+            }
+        });
 
         // === Kết bạn bên khách ===
-        friendIdList = new ArrayList<>(Arrays.asList(
-               otherUser.getFriendIds().split("-")));
-        if (!friendIdList.contains(currentUserId))
-            friendIdList.add(currentUserId);
-        friendIds = friendIdList.toString();
-        friendIds = friendIds.substring(1, friendIds.length() - 1).replaceAll(", ", "-");
-
-        database.collection(Constants.KEY_COLLECTION_USERS)
-                .document(otherUser.getId())
-                .update(Constants.KEY_FRIEND_IDS, friendIds);
-        otherUser.setFriendIds(friendIds);
+        DocumentReference othUserDoc = database.collection(Constants.KEY_COLLECTION_USERS)
+                .document(otherUser.getId());
+        othUserDoc.update(Constants.KEY_FRIEND_IDS, FieldValue.arrayUnion(currentUserId));
+        othUserDoc.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                otherUser.setFriendIds((List<String>) task.getResult().get(Constants.KEY_FRIEND_IDS));
+            }
+        });
 
         typeAction = "Unfriend";
         setTypeAction(typeAction);

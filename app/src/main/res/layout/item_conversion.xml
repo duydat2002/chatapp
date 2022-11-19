@@ -25,15 +25,19 @@
             app:riv_oval="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
-        
-        <View
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/viewOnline"
             android:layout_width="12dp"
             android:layout_height="12dp"
             android:layout_marginEnd="3dp"
             android:layout_marginBottom="3dp"
-            android:background="@drawable/background_image"
+            style="@style/Widget.Material3.Button.Icon"
             android:backgroundTint="@color/online"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
             app:layout_constraintEnd_toEndOf="@id/layoutImage"
             app:layout_constraintBottom_toBottomOf="@id/layoutImage"/>
         

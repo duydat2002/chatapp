@@ -6,6 +6,7 @@ public class ChatMessage {
     private String chatId, senderId, receiverId, message, timeStamp;
     private Date dateObj;
     private String conversionId, conversionName, conversionImage;
+    private Boolean isOnline;
 
     public ChatMessage() {
     }
@@ -80,5 +81,13 @@ public class ChatMessage {
 
     public void setConversionId(String conversionId) {
         this.conversionId = conversionId;
+    }
+
+    public Boolean getOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(Boolean online) {
+        isOnline = online;
     }
 }

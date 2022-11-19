@@ -87,6 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:background="#00FFFFFF"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -106,6 +107,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
+                android:background="#00FFFFFF"
                 android:text="Messages"
                 android:textColor="@color/primary"
                 android:textSize="13sp"
@@ -132,11 +134,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:background="#00FFFFFF"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/buttonNewMessage"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/buttonNewMessage">
+            app:layout_constraintVertical_bias="0.514">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/imageFriends"
@@ -151,6 +155,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
+                android:background="#00FFFFFF"
                 android:text="Friends"
                 android:textColor="@color/icon_color"
                 android:textSize="13sp"

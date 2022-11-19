@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends BaseActivity {
 
     private ActivityChatBinding binding;
     private PreferenceManager preferenceManager;
@@ -48,36 +48,49 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        loadReceiverDatas();
         initAll();
+        loadReceiverDatas();
         setListeners();
         listenMessages();
-    }
-
-    private void loadReceiverDatas() {
-        receiverUser = (User) getIntent().getSerializableExtra(Constants.KEY_USER);
-        binding.textName.setText(receiverUser.getName());
-//        if (receiverUser.getOnline()) {
-//            binding.textActive.setText("Online");
-//            binding.textActive.setTextColor(getResources().getColor(R.color.online));
-//        } else {
-//            binding.textActive.setText("Offline");
-//            binding.textActive.setTextColor(getResources().getColor(R.color.offline));
-//        }
-
-        byte[] bytes = Base64.decode(receiverUser.getImage(), Base64.DEFAULT);
-        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        binding.imageProfile.setImageBitmap(bitmap);
     }
 
     private void initAll() {
         preferenceManager = new PreferenceManager(getApplicationContext());
         senderId = preferenceManager.getString(Constants.KEY_USER_ID);
         chatMessages = new ArrayList<>();
+        receiverUser = (User) getIntent().getSerializableExtra(Constants.KEY_USER);
         chatAdapter = new ChatAdapter(chatMessages, senderId, receiverUser);
         binding.recyclerMessage.setAdapter(chatAdapter);
         database = FirebaseFirestore.getInstance();
         getConversionId();
+    }
+
+    private void loadReceiverDatas() {
+        binding.textName.setText(receiverUser.getName());
+        listenStatus(receiverUser.getId());
+        byte[] bytes = Base64.decode(receiverUser.getImage(), Base64.DEFAULT);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        binding.imageProfile.setImageBitmap(bitmap);
+    }
+
+    private void listenStatus(String id) {
+        database.collection(Constants.KEY_COLLECTION_USERS)
+                .document(id)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null)
+                        return;
+
+                    if (value != null) {
+                        Boolean isOnline = (Boolean) value.get(Constants.KEY_ONLINE);
+                        if (isOnline) {
+                            binding.textActive.setText("Online");
+                            binding.textActive.setTextColor(getResources().getColor(R.color.online));
+                        } else {
+                            binding.textActive.setText("Offline");
+                            binding.textActive.setTextColor(getResources().getColor(R.color.offline));
+                        }
+                    }
+                });
     }
 
     private void setListeners() {
@@ -118,6 +131,7 @@ public class ChatActivity extends AppCompatActivity {
             conversion.put(Constants.KEY_RECEIVER_IMAGE, receiverUser.getImage());
             conversion.put(Constants.KEY_LAST_MESSAGE, binding.inputMessage.getText().toString().trim());
             conversion.put(Constants.KEY_TIMESTAMP, new Date());
+            conversion.put(Constants.KEY_ONLINE, false);
             addConversion(conversion);
         }
 

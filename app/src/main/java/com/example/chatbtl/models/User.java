@@ -1,15 +1,17 @@
 package com.example.chatbtl.models;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class User implements Serializable {
-    private String id, name, phone, image, password, friendIds;
+    private String id, name, phone, image, password;
     private Boolean isOnline;
+    private List<String> friendIds;
 
     public User() {
     }
 
-    public User(String name, String phone, String image, String password, String friendIds) {
+    public User(String name, String phone, String image, String password, List<String> friendIds) {
         this.name = name;
         this.phone = phone;
         this.image = image;
@@ -57,19 +59,19 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public String getFriendIds() {
-        return friendIds;
-    }
-
-    public void setFriendIds(String friendIds) {
-        this.friendIds = friendIds;
-    }
-
     public Boolean getOnline() {
         return isOnline;
     }
 
     public void setOnline(Boolean online) {
         isOnline = online;
+    }
+
+    public List<String> getFriendIds() {
+        return friendIds;
+    }
+
+    public void setFriendIds(List<String> friendIds) {
+        this.friendIds = friendIds;
     }
 }

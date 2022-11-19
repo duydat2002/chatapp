@@ -24,8 +24,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -81,7 +83,8 @@ public class SignUpActivity extends AppCompatActivity {
         user.put(Constants.KEY_PHONE, binding.inputPhone.getText().toString());
         user.put(Constants.KEY_PASSWORD, binding.inputPassword.getText().toString());
         user.put(Constants.KEY_IMAGE, encodedImage);
-        user.put(Constants.KEY_FRIEND_IDS, "");
+        user.put(Constants.KEY_FRIEND_IDS, new ArrayList<String>());
+        user.put(Constants.KEY_ONLINE, true);
 
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection(Constants.KEY_COLLECTION_USERS)
@@ -96,6 +99,7 @@ public class SignUpActivity extends AppCompatActivity {
                     preferenceManager.putString(Constants.KEY_FRIEND_IDS, "");
 
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                    finish();
                 })
                 .addOnFailureListener(e -> {
                     loading(false);
