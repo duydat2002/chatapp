@@ -17,20 +17,24 @@ import com.example.chatbtl.interfaces.ConversionInterface;
 import com.example.chatbtl.models.ChatMessage;
 import com.example.chatbtl.models.User;
 import com.example.chatbtl.utilities.Constants;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class ConversionAdapter extends RecyclerView.Adapter<ConversionAdapter.ConversionViewHolder> {
 
     private List<ChatMessage> chatMessages;
     private ConversionInterface conversionInterface;
+    private List<User> listConversionUsers;
 
-    public ConversionAdapter(List<ChatMessage> chatMessages, ConversionInterface conversionInterface) {
+    public ConversionAdapter(List<ChatMessage> chatMessages, List<User> listConversionUsers, ConversionInterface conversionInterface) {
         this.chatMessages = chatMessages;
+        this.listConversionUsers = listConversionUsers;
         this.conversionInterface = conversionInterface;
     }
 
@@ -73,22 +77,93 @@ public class ConversionAdapter extends RecyclerView.Adapter<ConversionAdapter.Co
             binding.textName.setText(chatMessages.getConversionName());
             binding.textNewMessage.setText(chatMessages.getMessage());
             binding.textTimeMessage.setText(convertDate(chatMessages.getDateObj()));
-//            binding.viewOnline.setBackgroundTintList(
-//                ContextCompat.getColorStateList(binding.getRoot().getContext(),
-//                        chatMessages.getOnline() ?
-//                        R.color.online :
-//                        R.color.offline
-//                ));
 
-            binding.getRoot().setOnClickListener(v -> {
-                User user = new User();
-                user.setId(chatMessages.getConversionId());
-                user.setName(chatMessages.getConversionName());
-                user.setImage(chatMessages.getConversionImage());
+            for (User user : listConversionUsers) {
+                if (user.getId().equals(chatMessages.getConversionId())) {
+                    binding.viewOnline.setBackgroundTintList(
+                        ContextCompat.getColorStateList(binding.getRoot().getContext(),
+                                user.getOnline() ?
+                                R.color.online :
+                                R.color.offline
+                    ));
 
-                conversionInterface.onConversionClicked(user);
-            });
+                    binding.getRoot().setOnClickListener(v -> {
+                        Log.d("click", user.getId());
+                        conversionInterface.onConversionClicked(user);
+                    });
+                }
+            }
+
+//            getUser(chatMessages.getConversionId());
+
+//            if (user.getId() == null)
+//                Log.d("alo", "null");
+//            else
+//                Log.d("alo", "00000");
+
+
+
+
         }
+
+//        void setData(ChatMessage chatMessages) {
+//            byte[] bytes = Base64.decode(chatMessages.getConversionImage(), Base64.DEFAULT);
+//            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+//            binding.imageProfile.setImageBitmap(bitmap);
+//            binding.textName.setText(chatMessages.getConversionName());
+//            binding.textNewMessage.setText(chatMessages.getMessage());
+//            binding.textTimeMessage.setText(convertDate(chatMessages.getDateObj()));
+//            Log.d("conID", chatMessages.getConversionId());
+//
+//            User user = new User();
+//            FirebaseFirestore database = FirebaseFirestore.getInstance();
+//            database.collection(Constants.KEY_COLLECTION_USERS)
+//                    .document(chatMessages.getConversionId())
+//                    .get()
+//                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//                        @Override
+//                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                            DocumentSnapshot documentSnapshot = task.getResult();
+//                            user.setId(documentSnapshot.getId());
+//                            user.setName(documentSnapshot.getString(Constants.KEY_NAME));
+//                            user.setPhone(documentSnapshot.getString(Constants.KEY_PHONE));
+//                            user.setImage(documentSnapshot.getString(Constants.KEY_IMAGE));
+//                            user.setFriendIds((List<String>) documentSnapshot.get(Constants.KEY_FRIEND_IDS));
+//                            user.setOnline(documentSnapshot.getBoolean(Constants.KEY_ONLINE));
+//
+//                            if (user.getId() == null)
+//                                Log.d("alo", "null");
+//                            else
+//                                Log.d("alo", "00000");
+//
+//                            binding.viewOnline.setBackgroundTintList(
+//                                ContextCompat.getColorStateList(binding.getRoot().getContext(),
+//                                        user.getOnline() ?
+//                                        R.color.online :
+//                                        R.color.offline
+//                            ));
+//                        }
+//                    });
+//
+//
+//            binding.getRoot().setOnClickListener(v -> {
+//                Log.d("click", user.getId());
+//                conversionInterface.onConversionClicked(user);
+//            });
+//
+//
+//        }
+    }
+
+    private User getUser(String id) {
+        for (User u : listConversionUsers) {
+            if (u.getId().equals(id)) {
+                Log.d("find", "ok");
+                return u;
+            }
+        }
+
+        return null;
     }
 
     private String convertDate(Date date) {

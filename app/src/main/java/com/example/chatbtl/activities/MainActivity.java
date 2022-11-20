@@ -1,15 +1,13 @@
 package com.example.chatbtl.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 
-import com.example.chatbtl.R;
 import com.example.chatbtl.adapters.ConversionAdapter;
 import com.example.chatbtl.databinding.ActivityMainBinding;
 import com.example.chatbtl.interfaces.ConversionInterface;
@@ -19,13 +17,14 @@ import com.example.chatbtl.utilities.Constants;
 import com.example.chatbtl.utilities.PreferenceManager;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +36,8 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
     private List<ChatMessage> conversions;
     private ConversionAdapter conversionAdapter;
     private String currentUserId;
+    private List<String> listConversionIds;
+    private List<User> listConversionUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +48,7 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
         loadUserDatas();
         listenConversion();
         setListeners();
-//        listenUser();
+        listenUserStatus();
     }
 
     private void initAll() {
@@ -55,17 +56,23 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
         currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
         database = FirebaseFirestore.getInstance();
         conversions = new ArrayList<>();
-        conversionAdapter = new ConversionAdapter(conversions, this);
+        listConversionIds = new ArrayList<>();
+        listConversionUsers = new ArrayList<>();
+        conversionAdapter = new ConversionAdapter(conversions, listConversionUsers, this);
         binding.recyclerConversion.setAdapter(conversionAdapter);
     }
 
     private void setListeners() {
-        binding.buttonSearch.setOnClickListener(v ->
-                startActivity(new Intent(getApplicationContext(), FriendsActivity.class)));
+        binding.layoutSearch.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, FriendsActivity.class);
+            intent.putExtra("action", "search");
+            startActivity(intent);
+        });
         binding.buttonFriends.setOnClickListener(v ->
                 startActivity(new Intent(getApplicationContext(), FriendsActivity.class)));
         binding.imageProfile.setOnClickListener(v ->
                 startActivity(new Intent(getApplicationContext(), ProfileActivity.class)));
+
     }
 
     private void loadUserDatas() {
@@ -111,6 +118,7 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
                     chatMessage.setMessage(queryDocumentSnapshot.getString(Constants.KEY_LAST_MESSAGE));
                     chatMessage.setDateObj(queryDocumentSnapshot.getDate(Constants.KEY_TIMESTAMP));
                     conversions.add(chatMessage);
+                    listConversionIds.add(chatMessage.getConversionId());
                 } else if (documentChange.getType() == DocumentChange.Type.MODIFIED) {
                     for (int i = 0; i < conversions.size(); i++) {
                         if (conversions.get(i).getSenderId().equals(senderId) && conversions.get(i).getReceiverId().equals(receiverId)) {
@@ -122,6 +130,7 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
                 }
             }
             Collections.sort(conversions, (conversion1, conversion2) -> conversion2.getDateObj().compareTo(conversion1.getDateObj()));
+            getUserConversions();
             conversionAdapter.notifyDataSetChanged();
             binding.recyclerConversion.smoothScrollToPosition(0);
             binding.recyclerConversion.setVisibility(View.VISIBLE);
@@ -129,7 +138,25 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
         }
     };
 
-    private void listenUser() {
+    private void getUserConversions() {
+        database.collection(Constants.KEY_COLLECTION_USERS)
+                .whereIn(FieldPath.documentId(), listConversionIds)
+                .get()
+                .addOnCompleteListener(task -> {
+                    for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                        User user = new User();
+                        user.setId(queryDocumentSnapshot.getId());
+                        user.setName(queryDocumentSnapshot.getString(Constants.KEY_NAME));
+                        user.setPhone(queryDocumentSnapshot.getString(Constants.KEY_PHONE));
+                        user.setImage(queryDocumentSnapshot.getString(Constants.KEY_IMAGE));
+                        user.setFriendIds((List<String>) queryDocumentSnapshot.get(Constants.KEY_FRIEND_IDS));
+                        user.setOnline(queryDocumentSnapshot.getBoolean(Constants.KEY_ONLINE));
+                        listConversionUsers.add(user);
+                    }
+                });
+    }
+
+    private void listenUserStatus() {
         database.collection(Constants.KEY_COLLECTION_USERS)
                 .addSnapshotListener((value, error) -> {
                     if (error != null)
@@ -138,16 +165,26 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
                     if (value != null) {
                         for (DocumentChange documentChange : value.getDocumentChanges()) {
                             QueryDocumentSnapshot queryDocumentSnapshot = documentChange.getDocument();
-                            for (int i=0; i<conversions.size(); i++) {
-                                if (conversions.get(i).getConversionId().equals(queryDocumentSnapshot.getId())) {
-                                    conversions.get(i).setOnline((Boolean) queryDocumentSnapshot.get(Constants.KEY_ONLINE));
-                                    conversionAdapter.notifyItemChanged(i);
+                            for (int i=0; i<listConversionUsers.size(); i++) {
+                                if (listConversionUsers.get(i).getId().equals(queryDocumentSnapshot.getId())) {
+                                    listConversionUsers.get(i).setOnline((Boolean) queryDocumentSnapshot.get(Constants.KEY_ONLINE));
+                                    conversionAdapter.notifyItemChanged(getIndex(queryDocumentSnapshot.getId()));
+                                    Log.d("index", getIndex(queryDocumentSnapshot.getId()) + "");
                                     break;
                                 }
                             }
                         }
                     }
                 });
+    }
+
+    private int getIndex(String id) {
+        for (int i=0; i<conversions.size(); i++) {
+            if (conversions.get(i).getConversionId().equals(id)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override

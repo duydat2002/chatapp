@@ -42,6 +42,12 @@ public class FriendsActivity extends BaseActivity implements UserInterface {
         friends = new ArrayList<>();
         userAdapter = new UserAdapter(friends, this);
         binding.recyclerPeople.setAdapter(userAdapter);
+        String action = getIntent().getStringExtra("action");
+        if (action != null && action.equals("search")) {
+            binding.inputSearch.setVisibility(View.VISIBLE);
+            binding.inputAddFriend.setVisibility(View.INVISIBLE);
+            binding.inputSearch.requestFocus();
+        }
         setContentView(binding.getRoot());
         loadFriends();
         setListeners();
