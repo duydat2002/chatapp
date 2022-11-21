@@ -130,7 +130,7 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
                 }
             }
             Collections.sort(conversions, (conversion1, conversion2) -> conversion2.getDateObj().compareTo(conversion1.getDateObj()));
-            getUserConversions();
+            getListUserConversion();
             conversionAdapter.notifyDataSetChanged();
             binding.recyclerConversion.smoothScrollToPosition(0);
             binding.recyclerConversion.setVisibility(View.VISIBLE);
@@ -138,22 +138,30 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
         }
     };
 
-    private void getUserConversions() {
-        database.collection(Constants.KEY_COLLECTION_USERS)
-                .whereIn(FieldPath.documentId(), listConversionIds)
-                .get()
-                .addOnCompleteListener(task -> {
-                    for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                        User user = new User();
-                        user.setId(queryDocumentSnapshot.getId());
-                        user.setName(queryDocumentSnapshot.getString(Constants.KEY_NAME));
-                        user.setPhone(queryDocumentSnapshot.getString(Constants.KEY_PHONE));
-                        user.setImage(queryDocumentSnapshot.getString(Constants.KEY_IMAGE));
-                        user.setFriendIds((List<String>) queryDocumentSnapshot.get(Constants.KEY_FRIEND_IDS));
-                        user.setOnline(queryDocumentSnapshot.getBoolean(Constants.KEY_ONLINE));
-                        listConversionUsers.add(user);
-                    }
-                });
+    private void getListUserConversion() {
+        listConversionIds = new ArrayList<>();
+        for (ChatMessage conversion : conversions) {
+            listConversionIds.add(conversion.getConversionId());
+        }
+        if (listConversionIds.size() != 0) {
+            database.collection(Constants.KEY_COLLECTION_USERS)
+                    .whereIn(FieldPath.documentId(), listConversionIds)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            User user = new User();
+                            user.setId(queryDocumentSnapshot.getId());
+                            user.setName(queryDocumentSnapshot.getString(Constants.KEY_NAME));
+                            user.setPhone(queryDocumentSnapshot.getString(Constants.KEY_PHONE));
+                            user.setImage(queryDocumentSnapshot.getString(Constants.KEY_IMAGE));
+                            user.setFriendIds((List<String>) queryDocumentSnapshot.get(Constants.KEY_FRIEND_IDS));
+                            user.setOnline(queryDocumentSnapshot.getBoolean(Constants.KEY_ONLINE));
+                            listConversionUsers.add(user);
+                        }
+
+                        conversionAdapter.notifyDataSetChanged();
+                    });
+        }
     }
 
     private void listenUserStatus() {
@@ -168,9 +176,7 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
                             for (int i=0; i<listConversionUsers.size(); i++) {
                                 if (listConversionUsers.get(i).getId().equals(queryDocumentSnapshot.getId())) {
                                     listConversionUsers.get(i).setOnline((Boolean) queryDocumentSnapshot.get(Constants.KEY_ONLINE));
-                                    conversionAdapter.notifyItemChanged(getIndex(queryDocumentSnapshot.getId()));
-                                    Log.d("index", getIndex(queryDocumentSnapshot.getId()) + "");
-                                    break;
+                                    conversionAdapter.notifyItemChanged(getIndex(queryDocumentSnapshot.getId()));break;
                                 }
                             }
                         }
@@ -181,6 +187,7 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
     private int getIndex(String id) {
         for (int i=0; i<conversions.size(); i++) {
             if (conversions.get(i).getConversionId().equals(id)) {
+                Log.d("index", conversions.get(i).getConversionName());
                 return i;
             }
         }

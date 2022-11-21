@@ -9,6 +9,8 @@ import com.example.chatbtl.utilities.PreferenceManager;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+// Activity nền cho các activity khác extends (kế thừa)
+// Dùng để thay đổi trạng thái online của người dùng
 public class BaseActivity extends AppCompatActivity {
 
     private DocumentReference document;
@@ -22,12 +24,14 @@ public class BaseActivity extends AppCompatActivity {
                 .document(preferenceManager.getString(Constants.KEY_USER_ID));
     }
 
+    // Khi thoát khỏi màn hình
     @Override
     protected void onPause() {
         super.onPause();
         document.update(Constants.KEY_ONLINE, false);
     }
 
+    // Khi vào lại màn hình
     @Override
     protected void onResume() {
         super.onResume();

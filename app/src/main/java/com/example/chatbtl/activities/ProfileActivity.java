@@ -91,7 +91,10 @@ public class ProfileActivity extends BaseActivity {
         if (typeAction.equals("Unfriend")) {
             // Đã là bạn bè
             binding.buttonMain.setImageResource(R.drawable.ic_unfriend);
-            binding.buttonMain.setOnClickListener(v -> unFriend(otherUser));
+            binding.buttonMain.setOnClickListener(v -> {
+
+                unFriend(otherUser);
+            });
         } else {
             // Chưa phải bạn
             binding.buttonMain.setImageResource(R.drawable.ic_add_friend);

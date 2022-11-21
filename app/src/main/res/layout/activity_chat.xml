@@ -51,6 +51,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Duy Đạt"
@@ -60,7 +61,7 @@
             app:layout_constraintBottom_toBottomOf="@id/viewSupporter"
             app:layout_constraintStart_toEndOf="@id/viewSupporter"
             app:layout_constraintTop_toTopOf="@id/imageProfile"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toStartOf="@id/buttonCall" />
 
         <TextView
             android:id="@+id/textActive"
@@ -77,12 +78,25 @@
             app:layout_constraintBottom_toBottomOf="@id/imageProfile"
             app:layout_constraintWidth_percent="0.65"/>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/buttonCall"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/background_icon"
+            android:padding="8dp"
+            android:src="@drawable/ic_phone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/imageProfile"
+            app:layout_constraintBottom_toBottomOf="@id/imageProfile"
+            app:tint="@color/icon_color" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
+        android:id="@+id/layoutMain"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/layoutBottom"
+        app:layout_constraintBottom_toTopOf="@id/textAlert"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layoutTop">
@@ -107,8 +121,20 @@
 
     </FrameLayout>
 
+    <TextView
+        android:id="@+id/textAlert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="You must be friends to send messages"
+        android:textColor="@color/error"
+        android:textSize="@dimen/text"
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@id/layoutMain"
+        app:layout_constraintBottom_toTopOf="@id/layoutBottom"/>
+
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonAddNewFriend"
+        android:id="@+id/buttonAddFriend"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:insetTop="0dp"

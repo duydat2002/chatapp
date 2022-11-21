@@ -45,12 +45,12 @@
             android:id="@+id/buttonSearch"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="8dp"
             android:background="@drawable/background_icon"
+            android:padding="8dp"
             android:src="@drawable/ic_search"
-            app:tint="@color/icon_color"
-            app:layout_constraintStart_toStartOf="@id/layoutSearch"
-            app:layout_constraintTop_toTopOf="@id/layoutSearch"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/layoutSearch"
+            app:tint="@color/icon_color" />
 
         <EditText
             android:id="@+id/inputSearch"

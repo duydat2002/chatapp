@@ -90,9 +90,9 @@ public class FriendsActivity extends BaseActivity implements UserInterface {
 
     private void setListeners() {
         binding.buttonBack.setOnClickListener(v ->
-                startActivity(new Intent(getApplicationContext(), MainActivity.class)));
+                startActivity(new Intent(FriendsActivity.this, MainActivity.class)));
         binding.buttonMessages.setOnClickListener(v ->
-                startActivity(new Intent(getApplicationContext(), MainActivity.class)));
+                startActivity(new Intent(FriendsActivity.this, MainActivity.class)));
 
         binding.inputSearch.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus)
