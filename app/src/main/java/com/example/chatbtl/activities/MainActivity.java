@@ -176,7 +176,8 @@ public class MainActivity extends BaseActivity implements ConversionInterface{
                             for (int i=0; i<listConversionUsers.size(); i++) {
                                 if (listConversionUsers.get(i).getId().equals(queryDocumentSnapshot.getId())) {
                                     listConversionUsers.get(i).setOnline((Boolean) queryDocumentSnapshot.get(Constants.KEY_ONLINE));
-                                    conversionAdapter.notifyItemChanged(getIndex(queryDocumentSnapshot.getId()));break;
+                                    conversionAdapter.notifyItemChanged(getIndex(queryDocumentSnapshot.getId()));
+                                    break;
                                 }
                             }
                         }

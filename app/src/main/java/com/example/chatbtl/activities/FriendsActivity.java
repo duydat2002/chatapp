@@ -3,7 +3,10 @@ package com.example.chatbtl.activities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,6 +41,14 @@ public class FriendsActivity extends BaseActivity implements UserInterface {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityFriendsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        initAll();
+        loadFriends();
+        setListeners();
+        listenStatus();
+    }
+
+    private void initAll() {
         preferenceManager = new PreferenceManager(getApplicationContext());
         currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
         friends = new ArrayList<>();
@@ -48,10 +60,6 @@ public class FriendsActivity extends BaseActivity implements UserInterface {
             binding.inputAddFriend.setVisibility(View.INVISIBLE);
             binding.inputSearch.requestFocus();
         }
-        setContentView(binding.getRoot());
-        loadFriends();
-        setListeners();
-        listenStatus();
     }
 
     private void loadFriends() {
@@ -140,6 +148,15 @@ public class FriendsActivity extends BaseActivity implements UserInterface {
                 binding.inputAddFriend.setVisibility(View.INVISIBLE);
             }
         });
+
+        // Sắp xếp bạn theo tên tăng dần (friend1.getName().compareTo(friend2.getName())
+        // Sắp xếp bạn theo tên giảm dần (friend2.getName().compareTo(friend1.getName())
+        // Sắp xếp bạn theo SDT tăng dần (friend1.getPhone().compareTo(friend2.getPhone())
+//        binding.buttonSort.setOnClickListener(v -> {
+//            Collections.sort(friends, (friend1, friend2) -> friend1.getName().compareTo(friend2.getName()));
+//            userAdapter.notifyDataSetChanged();
+//        });
+
     }
 
     private void searchFriends(List<User> friends, String name) {

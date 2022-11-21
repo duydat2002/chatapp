@@ -132,12 +132,12 @@ public class ChatActivity extends BaseActivity {
         });
 
         binding.imageProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+            Intent intent = new Intent(ChatActivity.this, ProfileActivity.class);
             intent.putExtra(Constants.KEY_USER, receiverUser);
             startActivity(intent);
         });
         binding.textName.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+            Intent intent = new Intent(ChatActivity.this, ProfileActivity.class);
             intent.putExtra(Constants.KEY_USER, receiverUser);
             startActivity(intent);
         });
@@ -145,11 +145,11 @@ public class ChatActivity extends BaseActivity {
         binding.buttonAddFriend.setOnClickListener(view -> {
             addFriend();
         });
-
-        binding.buttonCall.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + receiverUser.getPhone()));
-            startActivity(intent);
-        });
+//       Call
+//        binding.buttonCall.setOnClickListener(v -> {
+//            Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + receiverUser.getPhone()));
+//            startActivity(intent);
+//        });
     }
 
     private void addFriend() {
@@ -216,7 +216,6 @@ public class ChatActivity extends BaseActivity {
             conversion.put(Constants.KEY_RECEIVER_IMAGE, receiverUser.getImage());
             conversion.put(Constants.KEY_LAST_MESSAGE, binding.inputMessage.getText().toString().trim());
             conversion.put(Constants.KEY_TIMESTAMP, new Date());
-            conversion.put(Constants.KEY_ONLINE, false);
             addConversion(conversion);
         }
 

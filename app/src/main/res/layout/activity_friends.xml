@@ -36,6 +36,21 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/buttonSort"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="8dp"
+        android:background="@drawable/background_icon"
+        android:src="@drawable/ic_sort"
+        app:tint="@color/icon_color"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/textTitle"
+        app:layout_constraintEnd_toStartOf="@id/buttonAddNewFriend"
+        app:layout_constraintTop_toTopOf="@id/textTitle"
+        app:layout_constraintBottom_toBottomOf="@id/textTitle"/>
+
+
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/buttonAddNewFriend"
         android:layout_width="32dp"
         android:layout_height="32dp"
@@ -191,8 +206,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/buttonNewMessage"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:padding="17dp"
             android:background="@drawable/background_image"
             android:backgroundTint="@color/primary"

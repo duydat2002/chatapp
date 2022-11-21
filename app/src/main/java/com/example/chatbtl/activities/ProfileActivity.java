@@ -2,8 +2,10 @@ package com.example.chatbtl.activities;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -60,7 +62,9 @@ public class ProfileActivity extends BaseActivity {
             binding.buttonBack.setOnClickListener(v ->
                     startActivity(new Intent(getApplicationContext(), MainActivity.class)));
             binding.buttonMain.setImageResource(R.drawable.ic_exit);
-            binding.buttonMain.setOnClickListener(v -> signOut());
+            binding.buttonMain.setOnClickListener(v -> {
+                signOut();
+            });
 
             binding.buttonChangeInfo.setVisibility(View.VISIBLE);
             binding.buttonChangePassword.setVisibility(View.VISIBLE);
@@ -87,18 +91,20 @@ public class ProfileActivity extends BaseActivity {
         });
     }
 
+    // Hủy / Thêm bạn
     private void setTypeAction(String typeAction) {
         if (typeAction.equals("Unfriend")) {
             // Đã là bạn bè
             binding.buttonMain.setImageResource(R.drawable.ic_unfriend);
             binding.buttonMain.setOnClickListener(v -> {
-
                 unFriend(otherUser);
             });
         } else {
             // Chưa phải bạn
             binding.buttonMain.setImageResource(R.drawable.ic_add_friend);
-            binding.buttonMain.setOnClickListener(v -> addFriend(otherUser));
+            binding.buttonMain.setOnClickListener(v -> {
+                addFriend(otherUser);
+            });
         }
     }
 

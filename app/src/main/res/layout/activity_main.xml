@@ -152,8 +152,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/buttonNewMessage"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:padding="17dp"
             android:background="@drawable/background_image"
             android:backgroundTint="@color/primary"

@@ -34,6 +34,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     private ActivitySignUpBinding binding;
     private PreferenceManager preferenceManager;
+    private FirebaseFirestore database;
     private String encodedImage;
 
     @Override
@@ -41,6 +42,7 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivitySignUpBinding.inflate(getLayoutInflater());
         preferenceManager = new PreferenceManager(getApplicationContext());
+        database = FirebaseFirestore.getInstance();
         setContentView(binding.getRoot());
         setListeners();
     }
@@ -86,7 +88,6 @@ public class SignUpActivity extends AppCompatActivity {
         user.put(Constants.KEY_FRIEND_IDS, new ArrayList<String>());
         user.put(Constants.KEY_ONLINE, true);
 
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection(Constants.KEY_COLLECTION_USERS)
                 .add(user)
                 .addOnSuccessListener(documentReference -> {

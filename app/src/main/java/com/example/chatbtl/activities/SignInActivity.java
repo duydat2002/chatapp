@@ -3,6 +3,7 @@ package com.example.chatbtl.activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.example.chatbtl.utilities.PreferenceManager;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -26,13 +28,15 @@ public class SignInActivity extends AppCompatActivity {
 
     private ActivitySignInBinding binding;
     private PreferenceManager preferenceManager;
-    private Boolean isNhomatkhau = false;
+    private FirebaseFirestore database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySignInBinding.inflate(getLayoutInflater());
         preferenceManager = new PreferenceManager(getApplicationContext());
+        database = FirebaseFirestore.getInstance();
+
         if (preferenceManager.getBoolean(Constants.KEY_IS_SIGNED_IN)) {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
@@ -58,19 +62,11 @@ public class SignInActivity extends AppCompatActivity {
                 signIn();
             }
         });
-
-        binding.nhomatkhau.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                isNhomatkhau = b;
-            }
-        });
     }
 
     private void signIn() {
         loading(true);
 
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection(Constants.KEY_COLLECTION_USERS)
                 .whereEqualTo(Constants.KEY_PHONE, binding.inputPhone.getText().toString())
                 .whereEqualTo(Constants.KEY_PASSWORD, binding.inputPassword.getText().toString())

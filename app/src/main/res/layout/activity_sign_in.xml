@@ -107,11 +107,12 @@
         </FrameLayout>
 
         <CheckBox
-            android:id="@+id/nhomatkhau"
+            android:id="@+id/cboxSaveLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:text="Nho mat khau"
+            android:text="Save login"
+            android:visibility="gone"
             android:layout_gravity="center_horizontal"/>
 
         <FrameLayout
